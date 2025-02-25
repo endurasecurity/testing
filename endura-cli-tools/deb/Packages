@@ -1,0 +1,58 @@
+Package: endura-cli-tools
+Version: 0.2.2.e0e48d0
+Architecture: amd64
+Maintainer: Infrared Security, LLC.
+Installed-Size: 10472
+Filename: ./endura-cli-tools_0.2.2.e0e48d0_amd64.deb
+Size: 2740444
+MD5sum: 6d37985d38d57d2f68aa2eb7ba37a18b
+SHA1: 8f64baf3b395cb3b75965287394e765690c12600
+SHA256: c45690ac5db1dc6e071235ba11b15c63e59affd07b92ab2e6459549c9cb9593b
+Section: Development
+Priority: optional
+Description: cli tools
+ # endura-cli-tools
+ .
+ TBD
+ .
+ ## Environment Settings
+ .
+ - **ENDURA_BATCHER_AUTOFLUSH**: true/false (default: false)
+ - **ENDURA_LOG_LEVEL**: level of logging (default: info, cli supported)
+ - **ENDURA_LOG_FILE**: save logs to this file (default: undefined, cli
+ supported)
+ - **ENDURA_TEAM_SERVER**: https://your.team.server (default: undefined, cli
+ supported)
+ .
+ ## ADDITIONAL CHECKS:
+ .
+ - Inventory of libraries being used
+ - Execution of deleted binaries: check if inode == 0
+ - [x] Fileless Execution:
+     -> track fds created via memfd_create per process
+     -> check if filename starts with "/proc/self/fd/" or "/dev/fd/" indicating
+ executing from fd
+     -> extract fd from filename and see if found within "track fds" map
+ .
+ ## ISSUE: Who/what is allowed to kill our own process? use our socket?
+     [x] only root users not bound to a job can kill endura
+     -> only root users not bound to a job can interact with socket
+ .
+ ## ISSUE: not propagating attrs across forks
+ - create a "tp/sched/sched_process_fork" eBPF program and copy job references
+ from parent to child
+ .
+ ## BUG: mode derive failed
+ .
+ - not all events getting processed before job is removed
+ - temporary workaround in job stop command:
+ .
+     // FIXME: best effort to allow processing of remaining events
+     std::thread::sleep(Duration::from_secs(3));
+ .
+ ## QUESTION: musl threading performance issues
+ .
+ - see:
+ https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes/
+ - adopt mimalloc? already implemented. no metrics to assess impact!!
+
