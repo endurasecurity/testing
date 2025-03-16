@@ -1,13 +1,13 @@
 Package: endura-cli-tools
-Version: 0.2.2.e0e48d0
+Version: 0.7.3.b87da45
 Architecture: amd64
 Maintainer: Infrared Security, LLC.
-Installed-Size: 10472
-Filename: ./endura-cli-tools_0.2.2.e0e48d0_amd64.deb
-Size: 2740444
-MD5sum: 6d37985d38d57d2f68aa2eb7ba37a18b
-SHA1: 8f64baf3b395cb3b75965287394e765690c12600
-SHA256: c45690ac5db1dc6e071235ba11b15c63e59affd07b92ab2e6459549c9cb9593b
+Installed-Size: 12143
+Filename: ./endura-cli-tools_0.7.3.b87da45_amd64.deb
+Size: 3274588
+MD5sum: aabda0a70ec701dd1008968c3c4ade7c
+SHA1: 01b5231b3979a99209f03b990cf32d21a0eaef59
+SHA256: f275ff79b94c796a0b69165b0a8b1adca2ab16dd8e66974265336a50c55697c1
 Section: Development
 Priority: optional
 Description: cli tools
@@ -27,28 +27,155 @@ Description: cli tools
  ## ADDITIONAL CHECKS:
  .
  - Inventory of libraries being used
- - Execution of deleted binaries: check if inode == 0
- - [x] Fileless Execution:
-     -> track fds created via memfd_create per process
-     -> check if filename starts with "/proc/self/fd/" or "/dev/fd/" indicating
- executing from fd
-     -> extract fd from filename and see if found within "track fds" map
  .
- ## ISSUE: Who/what is allowed to kill our own process? use our socket?
-     [x] only root users not bound to a job can kill endura
-     -> only root users not bound to a job can interact with socket
+ ## PRIORITY ISSUES
  .
- ## ISSUE: not propagating attrs across forks
- - create a "tp/sched/sched_process_fork" eBPF program and copy job references
- from parent to child
+ ### ISSUE: what's causing us to track the actual runner itself?
  .
- ## BUG: mode derive failed
+ - runner executing with cwd set to job path. causes /usr/bin/endura tracking
+ should be untouchable
+ - why are we doing cwd? anything beyond the "container run"? maybe "cwd" only
+ matches should not trigger job_pin
+ .
+   execute:
+   - /home/runner/runners/2.322.0/bin/Runner.Worker:/usr/bin/bash
+   - /home/runner/runners/2.322.0/externals/node20/bin/node:/usr/bin/git
+   - /usr/bin/bash:/usr/bin/env
+   - /usr/bin/bash:/usr/bin/make
+   - /usr/bin/bash:/usr/bin/sleep
+   - /usr/bin/bash:/usr/bin/sudo
+   - /usr/bin/bash:/usr/local/lib/node_modules/npm/bin/npm-cli.js
+   -
+ /usr/bin/dash:/home/runner/work/endura-malware-demo/endura-malware-demo/node_modules/eslint/bin/eslint.js
+   - /usr/bin/dash:/usr/bin/basename
+   - /usr/bin/dash:/usr/bin/env
+   - /usr/bin/dash:/usr/bin/envsubst
+   - /usr/bin/dash:/usr/bin/gettext
+   - /usr/bin/dash:/usr/bin/sed
+   - /usr/bin/dash:/usr/bin/uname
+   - /usr/bin/dash:/usr/lib/git-core/git
+   - /usr/bin/env:/usr/local/bin/node
+   - /usr/bin/git:/usr/bin/dash
+   - /usr/bin/git:/usr/lib/git-core/git
+   - /usr/bin/git:/usr/lib/git-core/git-submodule
+   - /usr/bin/make:/usr/bin/bash
+   - /usr/bin/sudo:/usr/bin/endura
+   - /usr/local/bin/node:/usr/bin/dash
+ .
+ ### ISSUE: multiple ip address without hostname but we know are bound to
+ "cloudflare"
+ .
+ - added logic to detect cloudflare ips upfront, but "cloudflare" is not the
+ domain that was being accessed (alias)
+   - /usr/local/bin/node:104.16.0.35:443
+   - /usr/local/bin/node:104.16.1.35:443
+   - /usr/local/bin/node:104.16.24.34:443
+   - /usr/local/bin/node:104.16.25.34:443
+   - /usr/local/bin/node:104.16.26.34:443
+   - /usr/local/bin/node:104.16.27.34:443
+   - /usr/local/bin/node:104.16.28.34:443
+   - /usr/local/bin/node:104.16.3.35:443
+   - /usr/local/bin/node:104.16.30.34:443
+ .
+ ## ISSUE: [x] how do we handle programs reading arbitrary /proc/[pid] paths?
+ .
+   - /usr/local/bin/node:/proc/2445/cgroup
+   - /usr/local/bin/node:/proc/2445/maps
+   - /usr/local/bin/node:/proc/2457/cgroup
+   - /usr/local/bin/node:/proc/2457/maps
+   - /usr/local/bin/node:/proc/2469/cgroup
+   - /usr/local/bin/node:/proc/2469/maps
+   - /usr/local/bin/node:/proc/2483/cgroup
+   - /usr/local/bin/node:/proc/2483/maps
+   - /usr/local/bin/node:/proc/2497/cgroup
+   - /usr/local/bin/node:/proc/2497/maps
+   - /usr/local/bin/node:/proc/2508/cgroup
+   - /usr/local/bin/node:/proc/2508/maps
+   - /usr/bin/sudo:/proc/1/limits
+   - /usr/bin/sudo:/proc/2550/loginuid
+   - /usr/bin/sudo:/proc/2550/stat
+ .
+ proc files relevant to what we enforce:
+ .
+ /proc/[pid]/{auxv,environ,fd,io,ksm_merging_pages,ksm_stat,mem,mountstats,mountstats,pagemap,patch_state,personality,syscall}
+ .
+ UPDATE: we treat certain files under /proc/ as special, so must be explicitly
+ permitted here via path -> path of /proc/[pid]/exe, even if path-open grants
+ .
+ ## BACKLOG ISSUES
+ .
+ ### ISSUE: Oracle Linux 9.5 UEK does not support "bpf_strncmp" helper
+ .
+ - apparently we can use __weak to provide a fallback? per chatgpt
+ .
+ static inline __weak int bpf_strncmp(const char *s1, const char *s2, __u32 len)
+ {
+     #pragma unroll
+     for (__u32 i = 0; i < len; i++) {
+         char c1, c2;
+         bpf_probe_read_str(&c1, 1, &s1[i]);
+         bpf_probe_read_str(&c2, 1, &s2[i]);
+         if (c1 != c2) return c1 - c2;
+         if (c1 == '\0') break;
+     }
+     return 0;
+ }
+ .
+ .
+ ### ISSUE: bpf_path_write_map is getting overloaded
+ .
+ The security_file_permission function in the Linux Security Module (LSM)
+ framework is called for each individual write (or read) operation against a
+ file descriptor, not just once when the file descriptor is opened.
+ When a process performs a write operation using a file descriptor, the kernel's
+ VFS (Virtual File System) layer triggers various security hooks, including
+ security_file_permission. This happens for each distinct system call that
+ performs I/O, such as write(), pwrite(), writev(), etc.
+ The function serves as a hook that allows security modules (like SELinux,
+ AppArmor, etc.) to perform permission checks on each operation, rather than
+ just once at open time. This is important because:
+ .
+ Permissions or security contexts might change while a file descriptor remains
+ open
+ It allows for more granular auditing of file operations
+ Different operations (read vs write) might have different security implications
+ .
+ The general call pattern is that for each write operation, the kernel will
+ invoke security_file_permission with parameters indicating:
+ .
+ The file being accessed
+ The specific permission being requested (MAY_WRITE for writes)
+ .
+ This per-operation checking enables security modules to implement dynamic
+ access controls that can change during the lifetime of an open file descriptor.
+ .
+ ### [x] ISSUE: container run/socket - should it accept a tag?
+ .
+ - ex: hello-world:latest, hello-world:all?
+ .
+ ### ISSUE: mode derive failed
  .
  - not all events getting processed before job is removed
  - temporary workaround in job stop command:
  .
      // FIXME: best effort to allow processing of remaining events
      std::thread::sleep(Duration::from_secs(3));
+ .
+ ### ISSUE: some "writes" have empty dst path
+ .
+  - '/usr/bin/bash:'
+   - '/usr/bin/endura:'
+   - '/usr/bin/make:'
+   - '/usr/local/bin/node:'
+ .
+ ## ISSUE: likely need an "overwrite" policy
+ .
+ - assume github actions and the demo app
+ -> runner is based on node (is this actually true?)
+ -> npm install run by node
+ -> node can write to anything in workspace
+ - where is the "git clone" equivalent in the server logs?
+ -> ANS: events were lost due to starting job before server ready
  .
  ## QUESTION: musl threading performance issues
  .
