@@ -1,13 +1,13 @@
 Package: endura-cli-tools
-Version: 0.7.4.88dd813
+Version: 0.8.3.9b81a7b
 Architecture: amd64
 Maintainer: Infrared Security, LLC.
-Installed-Size: 12179
-Filename: ./endura-cli-tools_0.7.4.88dd813_amd64.deb
-Size: 3279232
-MD5sum: 30b90b2a2aececc201961edc7cc3e7b5
-SHA1: 381c872ed13bad1e2fec1903d9a3f4cc63f2acf2
-SHA256: 17ec55ee1af35eeb15905a770bb35ab0a168281165b3e83cf225b430ab36b8be
+Installed-Size: 12652
+Filename: ./endura-cli-tools_0.8.3.9b81a7b_amd64.deb
+Size: 3380724
+MD5sum: 0ee86794119c0ca5981776a3256e8f66
+SHA1: 023684ff4118c1017267d99b383ef87ac3ade588
+SHA256: ecdd964ea2536191ca9decf67f67d3f37fd2217b6ceefc8d6f42140e65f952a7
 Section: Development
 Priority: optional
 Description: cli tools
@@ -62,8 +62,11 @@ Description: cli tools
    - /usr/bin/sudo:/usr/bin/endura
    - /usr/local/bin/node:/usr/bin/dash
  .
- ### ISSUE: multiple ip address without hostname but we know are bound to
+ ### [x] ISSUE: multiple ip address without hostname but we know are bound to
  "cloudflare"
+ .
+ - FIX: inspecting DNS attempts and storing hostname, then reverse lookup on
+ derive as needed
  .
  - added logic to detect cloudflare ips upfront, but "cloudflare" is not the
  domain that was being accessed (alias)
@@ -104,7 +107,9 @@ Description: cli tools
  .
  ## BACKLOG ISSUES
  .
- ### ISSUE: Oracle Linux 9.5 UEK does not support "bpf_strncmp" helper
+ ### [x] ISSUE: Oracle Linux 9.5 UEK does not support "bpf_strncmp" helper
+ .
+ FIXME: just use our own helpers
  .
  - apparently we can use __weak to provide a fallback? per chatgpt
  .
@@ -122,7 +127,7 @@ Description: cli tools
  }
  .
  .
- ### ISSUE: bpf_path_write_map is getting overloaded
+ ### [x] ISSUE: bpf_path_write_map is getting overloaded
  .
  The security_file_permission function in the Linux Security Module (LSM)
  framework is called for each individual write (or read) operation against a
@@ -161,7 +166,7 @@ Description: cli tools
      // FIXME: best effort to allow processing of remaining events
      std::thread::sleep(Duration::from_secs(3));
  .
- ### ISSUE: some "writes" have empty dst path
+ ### [x] ISSUE: some "writes" have empty dst path
  .
   - '/usr/bin/bash:'
    - '/usr/bin/endura:'
