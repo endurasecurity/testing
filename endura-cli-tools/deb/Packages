@@ -1,13 +1,13 @@
 Package: endura-cli-tools
-Version: 0.8.5.45c86f0
+Version: 0.9.1.625f905
 Architecture: amd64
 Maintainer: Infrared Security, LLC.
-Installed-Size: 12664
-Filename: ./endura-cli-tools_0.8.5.45c86f0_amd64.deb
-Size: 3384256
-MD5sum: ff1c48506f16b1993371d70492f47c3b
-SHA1: dfc5becc39b2ce5a55ec85a748249c43b14a77b8
-SHA256: 39b12c1bb3f9f97220332ed1e03de90052efa834200c3bf3f1c7ae89c39b61bd
+Installed-Size: 12696
+Filename: ./endura-cli-tools_0.9.1.625f905_amd64.deb
+Size: 3385396
+MD5sum: 0f869c4e45343a08ffd4e850973d5c3f
+SHA1: c3a57b2a633c373aa080c5e46f36aeba84f88a65
+SHA256: e600fe6e91477bf8730b693d1e550bb0d37229b36aa63df6f5d77dc122869d82
 Section: Development
 Priority: optional
 Description: cli tools
@@ -28,150 +28,7 @@ Description: cli tools
  .
  - Inventory of libraries being used
  .
- ## PRIORITY ISSUES
- .
- ### ISSUE: what's causing us to track the actual runner itself?
- .
- - runner executing with cwd set to job path. causes /usr/bin/endura tracking
- should be untouchable
- - why are we doing cwd? anything beyond the "container run"? maybe "cwd" only
- matches should not trigger job_pin
- .
-   execute:
-   - /home/runner/runners/2.322.0/bin/Runner.Worker:/usr/bin/bash
-   - /home/runner/runners/2.322.0/externals/node20/bin/node:/usr/bin/git
-   - /usr/bin/bash:/usr/bin/env
-   - /usr/bin/bash:/usr/bin/make
-   - /usr/bin/bash:/usr/bin/sleep
-   - /usr/bin/bash:/usr/bin/sudo
-   - /usr/bin/bash:/usr/local/lib/node_modules/npm/bin/npm-cli.js
-   -
- /usr/bin/dash:/home/runner/work/endura-malware-demo/endura-malware-demo/node_modules/eslint/bin/eslint.js
-   - /usr/bin/dash:/usr/bin/basename
-   - /usr/bin/dash:/usr/bin/env
-   - /usr/bin/dash:/usr/bin/envsubst
-   - /usr/bin/dash:/usr/bin/gettext
-   - /usr/bin/dash:/usr/bin/sed
-   - /usr/bin/dash:/usr/bin/uname
-   - /usr/bin/dash:/usr/lib/git-core/git
-   - /usr/bin/env:/usr/local/bin/node
-   - /usr/bin/git:/usr/bin/dash
-   - /usr/bin/git:/usr/lib/git-core/git
-   - /usr/bin/git:/usr/lib/git-core/git-submodule
-   - /usr/bin/make:/usr/bin/bash
-   - /usr/bin/sudo:/usr/bin/endura
-   - /usr/local/bin/node:/usr/bin/dash
- .
- ### [x] ISSUE: multiple ip address without hostname but we know are bound to
- "cloudflare"
- .
- - FIX: inspecting DNS attempts and storing hostname, then reverse lookup on
- derive as needed
- .
- - added logic to detect cloudflare ips upfront, but "cloudflare" is not the
- domain that was being accessed (alias)
-   - /usr/local/bin/node:104.16.0.35:443
-   - /usr/local/bin/node:104.16.1.35:443
-   - /usr/local/bin/node:104.16.24.34:443
-   - /usr/local/bin/node:104.16.25.34:443
-   - /usr/local/bin/node:104.16.26.34:443
-   - /usr/local/bin/node:104.16.27.34:443
-   - /usr/local/bin/node:104.16.28.34:443
-   - /usr/local/bin/node:104.16.3.35:443
-   - /usr/local/bin/node:104.16.30.34:443
- .
- ## ISSUE: [x] how do we handle programs reading arbitrary /proc/[pid] paths?
- .
-   - /usr/local/bin/node:/proc/2445/cgroup
-   - /usr/local/bin/node:/proc/2445/maps
-   - /usr/local/bin/node:/proc/2457/cgroup
-   - /usr/local/bin/node:/proc/2457/maps
-   - /usr/local/bin/node:/proc/2469/cgroup
-   - /usr/local/bin/node:/proc/2469/maps
-   - /usr/local/bin/node:/proc/2483/cgroup
-   - /usr/local/bin/node:/proc/2483/maps
-   - /usr/local/bin/node:/proc/2497/cgroup
-   - /usr/local/bin/node:/proc/2497/maps
-   - /usr/local/bin/node:/proc/2508/cgroup
-   - /usr/local/bin/node:/proc/2508/maps
-   - /usr/bin/sudo:/proc/1/limits
-   - /usr/bin/sudo:/proc/2550/loginuid
-   - /usr/bin/sudo:/proc/2550/stat
- .
- proc files relevant to what we enforce:
- .
- /proc/[pid]/{auxv,environ,fd,io,ksm_merging_pages,ksm_stat,mem,mountstats,mountstats,pagemap,patch_state,personality,syscall}
- .
- UPDATE: we treat certain files under /proc/ as special, so must be explicitly
- permitted here via path -> path of /proc/[pid]/exe, even if path-open grants
- .
  ## BACKLOG ISSUES
- .
- ### [x] ISSUE: Oracle Linux 9.5 UEK does not support "bpf_strncmp" helper
- .
- FIXME: just use our own helpers
- .
- - apparently we can use __weak to provide a fallback? per chatgpt
- .
- static inline __weak int bpf_strncmp(const char *s1, const char *s2, __u32 len)
- {
-     #pragma unroll
-     for (__u32 i = 0; i < len; i++) {
-         char c1, c2;
-         bpf_probe_read_str(&c1, 1, &s1[i]);
-         bpf_probe_read_str(&c2, 1, &s2[i]);
-         if (c1 != c2) return c1 - c2;
-         if (c1 == '\0') break;
-     }
-     return 0;
- }
- .
- .
- ### [x] ISSUE: bpf_path_write_map is getting overloaded
- .
- The security_file_permission function in the Linux Security Module (LSM)
- framework is called for each individual write (or read) operation against a
- file descriptor, not just once when the file descriptor is opened.
- When a process performs a write operation using a file descriptor, the kernel's
- VFS (Virtual File System) layer triggers various security hooks, including
- security_file_permission. This happens for each distinct system call that
- performs I/O, such as write(), pwrite(), writev(), etc.
- The function serves as a hook that allows security modules (like SELinux,
- AppArmor, etc.) to perform permission checks on each operation, rather than
- just once at open time. This is important because:
- .
- Permissions or security contexts might change while a file descriptor remains
- open
- It allows for more granular auditing of file operations
- Different operations (read vs write) might have different security implications
- .
- The general call pattern is that for each write operation, the kernel will
- invoke security_file_permission with parameters indicating:
- .
- The file being accessed
- The specific permission being requested (MAY_WRITE for writes)
- .
- This per-operation checking enables security modules to implement dynamic
- access controls that can change during the lifetime of an open file descriptor.
- .
- ### [x] ISSUE: container run/socket - should it accept a tag?
- .
- - ex: hello-world:latest, hello-world:all?
- .
- ### ISSUE: mode derive failed
- .
- - not all events getting processed before job is removed
- - temporary workaround in job stop command:
- .
-     // FIXME: best effort to allow processing of remaining events
-     std::thread::sleep(Duration::from_secs(3));
- .
- ### [x] ISSUE: some "writes" have empty dst path
- .
-  - '/usr/bin/bash:'
-   - '/usr/bin/endura:'
-   - '/usr/bin/make:'
-   - '/usr/local/bin/node:'
  .
  ## ISSUE: likely need an "overwrite" policy
  .
