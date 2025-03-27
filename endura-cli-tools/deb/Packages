@@ -4,10 +4,10 @@ Architecture: amd64
 Maintainer: Infrared Security, LLC.
 Installed-Size: 12696
 Filename: ./endura-cli-tools_0.9.1.27199ae_amd64.deb
-Size: 3385564
-MD5sum: 0724c96196bb7d527e492394ad9ed27a
-SHA1: 8de1ba76c1acd4a198807440c05c2f16a93a4ad1
-SHA256: fa66e51d1b02526326b12bc6dd339339fd84f8d568c16584c2ed6a8b812afae7
+Size: 3385468
+MD5sum: 8c257d3518588514e0b00750d8a4707c
+SHA1: d2dcea073cd7ffea129d4fe348b00a6ef5d4e98f
+SHA256: 4809b5fb2c9e0937431acc4167fa5731918ef6c03b2577171992482c502ab5ad
 Section: Development
 Priority: optional
 Description: cli tools
