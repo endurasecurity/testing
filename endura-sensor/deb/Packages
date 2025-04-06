@@ -1,0 +1,65 @@
+Package: endura-sensor
+Version: 0.10.0.e76ed72
+Architecture: amd64
+Maintainer: Infrared Security, LLC.
+Installed-Size: 12748
+Filename: ./endura-sensor_0.10.0.e76ed72_amd64.deb
+Size: 3354756
+MD5sum: a6689d6eb540f06bd7af3295ecbf8cd0
+SHA1: 8e5590436c54bc25d5f19d75e4f34bbe6c4db4de
+SHA256: 4ef49a694783d9943019d2a2c2c295d98bd0417eca6a63568a79ed0efc9125e4
+Section: Development
+Priority: optional
+Description: sensor
+ # sensor
+ .
+ TBD
+ .
+ ## Environment Settings
+ .
+ - **ENDURA_BATCHER_AUTOFLUSH**: true/false (default: false)
+ - **ENDURA_LOG_LEVEL**: level of logging (default: info, cli supported)
+ - **ENDURA_LOG_FILE**: save logs to this file (default: undefined, cli
+ supported)
+ - **ENDURA_TEAM_SERVER**: https://your.team.server (default: undefined, cli
+ supported)
+ .
+ ## ADDITIONAL CHECKS:
+ .
+ - Inventory of libraries being used
+ .
+ ## ISSUES
+ .
+ ### ISSUE: only "/usr/bin/endura" is authorized to access the socket
+ .
+ ### ISSUE: who is authorized to invoke "/usr/bin/endura"?
+ .
+ - is there authentication? unclear how to ensure secret not exposed to other
+ processes
+ -> as long as the secret is not exposed as a global env, but job specific,
+ should be fine
+ - maybe define a list of authorized processes (in no order) all the way up the
+ chain?
+ -> different from path_exec in that we go beyond just 3 levels to our max
+ (currently 8; which can be exploited)
+ -> could be enforced at the userspace level
+ - maybe do both of the above?
+ -> a solution to this would still mean declaring path_exec for /usr/bin/endura
+ necessary?
+ - this strategy prevents someone from SSHing in and just killing the process
+ .
+ ### ISSUE: likely need an "overwrite" policy
+ .
+ - assume github actions and the demo app
+ -> runner is based on node (is this actually true?)
+ -> npm install run by node
+ -> node can write to anything in workspace
+ - where is the "git clone" equivalent in the server logs?
+ -> ANS: events were lost due to starting job before server ready
+ .
+ ### QUESTION: musl threading performance issues
+ .
+ - see:
+ https://www.linkedin.com/pulse/testing-alternative-c-memory-allocators-pt-2-musl-mystery-gomes/
+ - adopt mimalloc? already implemented. no metrics to assess impact!!
+
