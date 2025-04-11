@@ -1,13 +1,13 @@
 Package: endura-sensor
-Version: 0.10.2.7a523e3
+Version: 0.10.3.fcc60d2
 Architecture: amd64
 Maintainer: Infrared Security, LLC.
-Installed-Size: 12760
-Filename: ./endura-sensor_0.10.2.7a523e3_amd64.deb
-Size: 3355620
-MD5sum: a44044333444aaf2abfccb062aae786c
-SHA1: cb508162140f1854892717dce36740259f8db5e6
-SHA256: 7f886bfc9ad66e016b7bb672bbc9d1a7e42a39494fda1a1b854e3ffe6dce46cb
+Installed-Size: 12080
+Filename: ./endura-sensor_0.10.3.fcc60d2_amd64.deb
+Size: 3150844
+MD5sum: d34f1daf551d11a0a863c82be7eab1f2
+SHA1: c620834f4b48aa69e73816ed65fa8ee6d1151790
+SHA256: c32a92a59bbe5ed046ba4dad5c3bc75d6e1b8047eee4ab4ffd7a9b8a66a2449a
 Section: Development
 Priority: optional
 Description: sensor
@@ -47,6 +47,9 @@ Description: sensor
  -> a solution to this would still mean declaring path_exec for /usr/bin/endura
  necessary?
  - this strategy prevents someone from SSHing in and just killing the process
+ .
+ - UPDATE: enforce 3 level path_exec, add "ENDURA_SENSOR_KEY" and validate
+ before processing "endura" command
  .
  ### ISSUE: likely need an "overwrite" policy
  .
