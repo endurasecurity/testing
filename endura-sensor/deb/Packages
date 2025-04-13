@@ -4,10 +4,10 @@ Architecture: amd64
 Maintainer: Infrared Security, LLC.
 Installed-Size: 12080
 Filename: ./endura-sensor_0.10.3.fcc60d2_amd64.deb
-Size: 3150580
-MD5sum: 0aa15565f4c21b0a1f8d0a99885b9b1b
-SHA1: 5a3cea5d915f024cb7d210c525b020d6cb766373
-SHA256: dd3c9f141e49cbc8ee058e593715e09cdd46d23cccda2f71ed5bc998e1c67164
+Size: 3150748
+MD5sum: 290db59838d488f9d3274e034aa6cd4f
+SHA1: 4b4763b1ef7eebc7f29c2f0656c116844ca6c506
+SHA256: dec508b2a6dfbddb8fafef2d4f3ec3a14a6e7c07b1f19b3471946973e6220a85
 Section: Development
 Priority: optional
 Description: sensor
